@@ -24,5 +24,14 @@ func main() {
 	}
 
 	// クイズを実行
+	// テスト環境ではクイズを実行しない
+	if os.Getenv("APP_ENV") != "test" {
+		// クイズを実行
+		// RunQuiz(quiz)
+
+		return
+	}
+	// // クイズを実行
 	RunQuiz(quiz)
+
 }

@@ -52,7 +52,8 @@ func FetchSheetsData(filePath string) ([]SheetData, error) {
 		}
 	}
 	if demoFlg == "true" {
-		fmt.Println("DEMO MODE")
+		fmt.Println("DEMO MODE!!!!")
 	}
+
 	return data, nil
 }

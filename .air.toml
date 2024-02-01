@@ -1,0 +1,25 @@
+# .air.toml
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # テストコマンドをビルドコマンドとして指定
+  cmd = "go test ./..."
+  # ビルド後に実行するバイナリは不要なのでコメントアウト
+  # bin = "./tmp/main"
+  include_ext = ["go", "mod"]
+  # テストファイルの変更も監視する
+  include = ["*_test.go"]
+  exclude_regex = []
+  exclude_dir = []
+  # exclude_dir = ["assets", "tmp", "vendor", "frontend", "scripts"]
+
+[log]
+  time_format = "15:04:05"
+  level = "debug"
+
+[color]
+  main = "yellow"
+  watcher = "cyan"
+  build = "green"
+  runner = "magenta"
