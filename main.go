@@ -11,7 +11,14 @@ import (
 )
 
 func main() {
-	spreadsheetFile := "spreadsheet.xlsx"
+	// コマンドラインオプションの定義
+	var seed string
+	flag.StringVar(&seed, "seed", "", "乱数のシード値を指定")
+	var spreadsheetFile string
+	flag.StringVar(&spreadsheetFile, "xlsx", "spreadsheet.xlsx", "読み込むスプレッドシートファイルのパス")
+
+	// 他のフラグと共にパースする
+	flag.Parse()
 
 	// スプレッドシートからデータを取得
 	data, err := FetchSheetsData(spreadsheetFile)
@@ -19,11 +26,6 @@ func main() {
 		fmt.Printf("スプレッドシートからデータを取得できませんでした: %v\n", err)
 		os.Exit(1)
 	}
-
-	// コマンドラインオプションの定義
-	var seed string
-	flag.StringVar(&seed, "seed", "", "乱数のシード値を指定")
-	flag.Parse()
 
 	var r *rand.Rand
 	// シード値が指定されていれば乱数のシードを設定
