@@ -4,7 +4,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"time"
 )
 
 // QuizItem はクイズの一問を表す構造体です。
@@ -15,9 +14,9 @@ type QuizItem struct {
 }
 
 // GenerateQuiz はスプレッドシートのデータからクイズを生成します。
-func GenerateQuiz(data []SheetData, numQuestions int) ([]QuizItem, error) {
-	src := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(src)
+func GenerateQuiz(data []SheetData, numQuestions int, r *rand.Rand) ([]QuizItem, error) {
+	// src := rand.NewSource(time.Now().UnixNano())
+	// r := rand.New(src)
 	r.Shuffle(len(data), func(i, j int) { data[i], data[j] = data[j], data[i] })
 
 	if len(data) < numQuestions {
