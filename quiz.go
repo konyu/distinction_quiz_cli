@@ -3,7 +3,10 @@ package main
 
 import (
 	"fmt"
+	"hash/fnv"
 	"math/rand"
+	"os"
+	"time"
 )
 
 // QuizItem はクイズの一問を表す構造体です。
@@ -14,9 +17,8 @@ type QuizItem struct {
 }
 
 // GenerateQuiz はスプレッドシートのデータからクイズを生成します。
-func GenerateQuiz(data []SheetData, numQuestions int, r *rand.Rand) ([]QuizItem, error) {
-	// src := rand.NewSource(time.Now().UnixNano())
-	// r := rand.New(src)
+func GenerateQuiz(data []SheetData, numQuestions int, seed string) ([]QuizItem, error) {
+	r := generateRand(seed)
 	r.Shuffle(len(data), func(i, j int) { data[i], data[j] = data[j], data[i] })
 
 	if len(data) < numQuestions {
@@ -92,4 +94,22 @@ func RunQuiz(quiz []QuizItem) {
 	}
 
 	fmt.Printf("正解数 %d/%d\n", correctCount, len(quiz))
+}
+
+func generateRand(seed string) *rand.Rand {
+	var r *rand.Rand
+
+	if seed != "" {
+		h := fnv.New64a()
+		_, err := h.Write([]byte(seed))
+		if err != nil {
+			fmt.Printf("シード値のハッシュ生成中にエラーが発生しました: %v\n", err)
+			os.Exit(1)
+		}
+		seedInt := int64(h.Sum64())
+		r = rand.New(rand.NewSource(seedInt))
+	} else {
+		r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	}
+	return r
 }
