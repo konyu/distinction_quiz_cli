@@ -1,10 +1,12 @@
-// main.go
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
+
+	"distinction_quiz_cli/quiz"
+	"distinction_quiz_cli/sheets"
 )
 
 func main() {
@@ -17,14 +19,14 @@ func main() {
 	flag.Parse()
 
 	// スプレッドシートからデータを取得
-	data, err := FetchSheetsData(spreadsheetFile)
+	data, err := sheets.FetchSheetsData(spreadsheetFile)
 	if err != nil {
 		fmt.Printf("スプレッドシートからデータを取得できませんでした: %v\n", err)
 		os.Exit(1)
 	}
 
 	// クイズを生成
-	quiz, err := GenerateQuiz(data, 10, seed)
+	quizItems, err := quiz.GenerateQuiz(data, 10, seed)
 	if err != nil {
 		fmt.Printf("クイズを生成できませんでした: %v\n", err)
 		os.Exit(1)
@@ -33,7 +35,7 @@ func main() {
 	// テスト環境ではクイズを実行しない
 	if os.Getenv("APP_ENV") != "test" {
 		// クイズを実行
-		RunQuiz(quiz)
+		quiz.RunQuiz(quizItems)
 
 		return
 	}
