@@ -2,6 +2,7 @@ package sheets
 
 import (
 	"fmt"
+	"io/fs"
 
 	"github.com/xuri/excelize/v2"
 )
@@ -15,23 +16,43 @@ type SheetData struct {
 
 var demoFlg string = ""
 
-// FetchSheetsData は指定されたファイルのExcelスプレッドシートからデータを取得します。
+// FetchSheetsData はファイルパスからExcelスプレッドシートのデータを取得します。
 func FetchSheetsData(filePath string) ([]SheetData, error) {
-	f, err := excelize.OpenFile(filePath)
+	excelFile, err := excelize.OpenFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open Excel file: %v", err)
 	}
+	defer excelFile.Close()
+
+	return readSheetData(excelFile)
+}
+
+// FetchSheetsDataFromFS は embed.FS からExcelスプレッドシートのデータを取得します。
+func FetchSheetsDataFromFS(fsys fs.FS, filePath string) ([]SheetData, error) {
+	f, err := fsys.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open Excel file from embedded FS: %v", err)
+	}
 	defer f.Close()
 
+	excelFile, err := excelize.OpenReader(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read Excel file from embedded FS: %v", err)
+	}
+	defer excelFile.Close()
+
+	return readSheetData(excelFile)
+}
+
+func readSheetData(excelFile *excelize.File) ([]SheetData, error) {
 	var data []SheetData
-	for _, sheetName := range f.GetSheetMap() {
-		rows, err := f.GetRows(sheetName)
+	for _, sheetName := range excelFile.GetSheetMap() {
+		rows, err := excelFile.GetRows(sheetName)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get rows from sheet '%s': %v", sheetName, err)
 		}
 
 		for i, row := range rows {
-			// ヘッダー行をスキップ
 			if i == 0 || row[0] == "#" {
 				continue
 			}
@@ -39,11 +60,11 @@ func FetchSheetsData(filePath string) ([]SheetData, error) {
 			if demoFlg == "true" && i > 21 {
 				break
 			}
-			// 行のデータが足りない場合はスキップ
+
 			if len(row) < 3 {
 				continue
 			}
-			// SheetDataにデータを追加
+
 			data = append(data, SheetData{
 				Number:      row[0],
 				Word:        row[1],
@@ -51,6 +72,7 @@ func FetchSheetsData(filePath string) ([]SheetData, error) {
 			})
 		}
 	}
+
 	if demoFlg == "true" {
 		fmt.Println("DEMO MODE!!!!")
 	}

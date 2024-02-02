@@ -1,4 +1,3 @@
-// quiz.go
 package quiz
 
 import (
