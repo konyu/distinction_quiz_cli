@@ -3,7 +3,8 @@ Distinction Quiz CLIは、エクセルファイルからクイズを生成し、
 Distinctionとついている通り、https://distinction.atsueigo.com/ の単語の勉強をスキマ時間で行うためのものです。
 
 
-Uploading 画面収録 2024-01-31 19.11.44.mov…
+https://github.com/konyu/distinction_quiz_cli/assets/1217706/18a80ce2-b6d0-4b32-a0b8-6142cb1d1978
+
 
 
 ## 特徴
