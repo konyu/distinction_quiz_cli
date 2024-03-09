@@ -1,4 +1,23 @@
+# Excel files
 *.xlsx
+# accept sample xlsx file
+!spreadsheet.xlsx
+
 distinction_quiz_cli
 
 tmp
+
+.DS_Store
+# Go specific
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build
+build/
+bin/
+
+# Dependency directories
+vendor/

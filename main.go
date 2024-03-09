@@ -1,62 +1,49 @@
 package main
 
 import (
-	"embed"
-	"flag"
-	"fmt"
-	"os"
-
 	"distinction_quiz_cli/quiz"
 	"distinction_quiz_cli/sheets"
+	"embed"
+	"flag"
+	"log"
 )
 
-// スプレッドシートを埋め込む
-
 //go:embed spreadsheet.xlsx
-var embeddedFiles embed.FS
+var spreadsheetFS embed.FS
+
+const (
+	defaultSpreadsheet  = "spreadsheet.xlsx"
+	defaultNumQuestions = 10 // デフォルトの問題数
+)
 
 func main() {
 	// コマンドラインオプションの定義
 	var seed string
 	flag.StringVar(&seed, "seed", "", "乱数のシード値を指定")
 	var spreadsheetFile string
-	flag.StringVar(&spreadsheetFile, "xlsx", "", "読み込むスプレッドシートファイルのパス")
-	// 他のフラグと共にパースする
+	flag.StringVar(&spreadsheetFile, "xlsx", defaultSpreadsheet, "読み込むスプレッドシートファイルのパス")
+	var numQuestions int
+	flag.IntVar(&numQuestions, "num", defaultNumQuestions, "生成するクイズの問題数")
 	flag.Parse()
 
-	// スプレッドシートからデータを取得
-	data := getSpreadSheetData(spreadsheetFile)
-	// クイズを生成
-	quizItems, err := quiz.GenerateQuiz(data, 10, seed)
-	if err != nil {
-		fmt.Printf("クイズを生成できませんでした: %v\n", err)
-		os.Exit(1)
-	}
-	// クイズを実行
-	// テスト環境ではクイズを実行しない
-	if os.Getenv("APP_ENV") != "test" {
-		// クイズを実行
-		quiz.RunQuiz(quizItems)
-
-		return
-	}
-}
-
-func getSpreadSheetData(spreadsheetFile string) []sheets.SheetData {
 	var data []sheets.SheetData
 	var err error
-	if spreadsheetFile == "" {
-
-		data, err = sheets.FetchSheetsDataFromFS(embeddedFiles, "spreadsheet.xlsx")
-		if err != nil {
-			fmt.Printf("スプレッドシートからデータを取得できませんでした: %v\n", err)
-			os.Exit(1)
-		}
-	} else {
+	// コマンドラインオプションで指定されたファイルパスがデフォルトと異なる場合は、そのファイルを使用
+	if spreadsheetFile != defaultSpreadsheet {
 		data, err = sheets.FetchSheetsData(spreadsheetFile)
-		if err != nil {
-			fmt.Printf("スプレッドシートからデータを取得できませんでした: %v\n", err)
-		}
+	} else {
+		// デフォルトのファイルパスが指定されている場合は、埋め込んだファイルを使用
+		data, err = sheets.FetchSheetsDataFromFS(spreadsheetFS, defaultSpreadsheet)
 	}
-	return data
+	if err != nil {
+		log.Fatalf("Error fetching sheet data: %v\n", err)
+	}
+	// クイズを生成
+	quizItems, err := quiz.GenerateQuiz(data, numQuestions, seed)
+	if err != nil {
+		log.Fatalf("Error generating quiz: %v\n", err)
+	}
+
+	// クイズを実行
+	quiz.RunQuiz(quizItems)
 }

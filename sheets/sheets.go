@@ -14,13 +14,11 @@ type SheetData struct {
 	Translation string
 }
 
-var demoFlg string = ""
-
 // FetchSheetsData はファイルパスからExcelスプレッドシートのデータを取得します。
 func FetchSheetsData(filePath string) ([]SheetData, error) {
 	excelFile, err := excelize.OpenFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open Excel file: %v", err)
+		return nil, fmt.Errorf("failed to open Excel file: %w", err)
 	}
 	defer excelFile.Close()
 
@@ -31,38 +29,36 @@ func FetchSheetsData(filePath string) ([]SheetData, error) {
 func FetchSheetsDataFromFS(fsys fs.FS, filePath string) ([]SheetData, error) {
 	f, err := fsys.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open Excel file from embedded FS: %v", err)
+		return nil, fmt.Errorf("failed to open Excel file from embedded FS: %w", err)
 	}
 	defer f.Close()
 
 	excelFile, err := excelize.OpenReader(f)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read Excel file from embedded FS: %v", err)
+		return nil, fmt.Errorf("failed to read Excel file from embedded FS: %w", err)
 	}
 	defer excelFile.Close()
 
 	return readSheetData(excelFile)
 }
 
+// readSheetData はExcelファイルからシートデータを読み込みます。
 func readSheetData(excelFile *excelize.File) ([]SheetData, error) {
 	var data []SheetData
-	for _, sheetName := range excelFile.GetSheetMap() {
+	sheets := excelFile.GetSheetMap()
+	for _, sheetName := range sheets {
 		rows, err := excelFile.GetRows(sheetName)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get rows from sheet '%s': %v", sheetName, err)
+			return nil, fmt.Errorf("failed to get rows from sheet '%s': %w", sheetName, err)
 		}
 
 		for i, row := range rows {
 			if i == 0 || row[0] == "#" {
-				continue
-			}
-
-			if demoFlg == "true" && i > 21 {
-				break
+				continue // ヘッダー行またはコメント行をスキップ
 			}
 
 			if len(row) < 3 {
-				continue
+				return nil, fmt.Errorf("invalid row format at sheet '%s', row %d", sheetName, i+1)
 			}
 
 			data = append(data, SheetData{
@@ -71,10 +67,6 @@ func readSheetData(excelFile *excelize.File) ([]SheetData, error) {
 				Translation: row[2],
 			})
 		}
-	}
-
-	if demoFlg == "true" {
-		fmt.Println("DEMO MODE!!!!")
 	}
 
 	return data, nil
