@@ -2,10 +2,7 @@
 Distinction Quiz CLIは、エクセルファイルからクイズを生成し、コマンドラインで実行するGo製のアプリです。
 Distinctionとついている通り、https://distinction.atsueigo.com/ の単語の勉強をスキマ時間で行うためのものです。
 
-
-https://github.com/konyu/distinction_quiz_cli/assets/1217706/18a80ce2-b6d0-4b32-a0b8-6142cb1d1978
-
-
+https://github.com/konyu/distinction_quiz_cli/assets/1217706/7e340270-a960-4004-8725-7cb2ad9067b5
 
 ## 特徴
 
